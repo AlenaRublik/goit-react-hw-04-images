@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 
 import { ToastContainer, toast } from 'react-toastify';
 import SearchBar from './SearchBar/SearchBar';
@@ -9,83 +9,72 @@ import { Button } from './Button/Button';
 import Loader from './Loader/Loader';
 import { Text } from './Text/Text';
 
-export class App extends Component {
-  state = {
-    searchQuery: '',
-    pictures: [],
-    page: 1,
-    loading: false,
-    loadMore: false,
-    error: '',
-  };
-  async componentDidUpdate(_, prevState) {
-    if (
-      prevState.searchQuery !== this.state.searchQuery ||
-      prevState.page !== this.state.page
-    ) {
+export function App() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [pictures, setPictures] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [loadMore, setLoadMore] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    (async function Test() {
+       if (!searchQuery) return;
       try {
-        this.setState({ loading: true, loadMore: true });
+        setLoading(true);
+        setLoadMore(true);
         const res = await fetchPictures(
-          this.state.searchQuery,
-          this.state.page
+          searchQuery,
+          page
         );
-        this.setState({
-          pictures:
-            prevState.searchQuery !== this.state.searchQuery
-              ? res.hits
-              : [...prevState.pictures, ...res.hits],
-        });
+
+        setPictures(prevState => [...prevState, ...res.hits])
+
         if (res.total === 0) {
           throw new Error('Sorry, no images found');
         }
-        if (res.totalHits <= this.state.page * perPage) {
-          this.setState({
-            loadMore: false,
-          });
-        }
-      } catch (error) {
-        this.setState({ error: error.message });
-      } finally {
-        this.setState({ loading: false });
-      }
-    }
-  }
-  onError = () => {
-    this.setState({ error: true, loading: false, loadMore: false });
-  };
 
-handleSearch = searchQuery => {
-    const initialStateParams = {
-      page: 1,
-      pictures: [],
-      error: '',
-      loadMore: false,
-    };
-  
-    if (searchQuery === this.state.searchQuery) {
+        if (res.totalHits <= page * perPage) {
+          setLoadMore(false);
+        }
+      }
+      catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      };
+
+    })();
+  }, [searchQuery, page])
+
+const handleSearch = query => {
+
+  if (query === searchQuery) {
+      console.log(query)
       toast.error(
         'The same request. Change your request'
       );
       return;
     }
 
-    this.setState({ ...initialStateParams, searchQuery });
+
+  setPage(1);
+  setPictures([]);
+  setError('');
+  setLoadMore(false);
+    setSearchQuery(query);
 };
   
-   handleLoadMore = () => {
-    this.setState(prevState => {
-      return { page: prevState.page + 1 };
-    });
-  };
-
-  render() {
-    const { error, pictures, loading, loadMore } = this.state;
+  const handleLoadMore = () => {
+    setPage(prevState => prevState + 1 );
+};
+  
     return (
       <>
-        <SearchBar handleSearch={this.handleSearch} />
+        <SearchBar handleSearch={handleSearch} />
       {pictures.length > 0 && !error && <ImageGallery pictures={pictures} />}
         {pictures.length > 0 && loadMore && !error && (
-          <Button onClick={this.handleLoadMore} />
+          <Button onClick={handleLoadMore} />
         )}
            {error && !loading && <Text>{error}</Text>}
         {loading && <Loader />}
@@ -93,4 +82,90 @@ handleSearch = searchQuery => {
       </>
     );
   }
-}
+
+
+// export class App extends Component {
+//   state = {
+//     searchQuery: '',
+//     pictures: [],
+//     page: 1,
+//     loading: false,
+//     loadMore: false,
+//     error: '',
+//   };
+//   async componentDidUpdate(_, prevState) {
+//     if (
+//       prevState.searchQuery !== this.state.searchQuery ||
+//       prevState.page !== this.state.page
+//     ) {
+//       try {
+//         this.setState({ loading: true, loadMore: true });
+//         const res = await fetchPictures(
+//           this.state.searchQuery,
+//           this.state.page
+//         );
+//         this.setState({
+//           pictures:
+//             prevState.searchQuery !== this.state.searchQuery
+//               ? res.hits
+//               : [...prevState.pictures, ...res.hits],
+//         });
+//         if (res.total === 0) {
+//           throw new Error('Sorry, no images found');
+//         }
+//         if (res.totalHits <= this.state.page * perPage) {
+//           this.setState({
+//             loadMore: false,
+//           });
+//         }
+//       } catch (error) {
+//         this.setState({ error: error.message });
+//       } finally {
+//         this.setState({ loading: false });
+//       }
+//     }
+//   }
+//   onError = () => {
+//     this.setState({ error: true, loading: false, loadMore: false });
+//   };
+
+// handleSearch = searchQuery => {
+//     const initialStateParams = {
+//       page: 1,
+//       pictures: [],
+//       error: '',
+//       loadMore: false,
+//     };
+  
+//     if (searchQuery === this.state.searchQuery) {
+//       toast.error(
+//         'The same request. Change your request'
+//       );
+//       return;
+//     }
+
+//     this.setState({ ...initialStateParams, searchQuery });
+// };
+  
+//    handleLoadMore = () => {
+//     this.setState(prevState => {
+//       return { page: prevState.page + 1 };
+//     });
+//   };
+
+//   render() {
+//     const { error, pictures, loading, loadMore } = this.state;
+//     return (
+//       <>
+//         <SearchBar handleSearch={this.handleSearch} />
+//       {pictures.length > 0 && !error && <ImageGallery pictures={pictures} />}
+//         {pictures.length > 0 && loadMore && !error && (
+//           <Button onClick={this.handleLoadMore} />
+//         )}
+//            {error && !loading && <Text>{error}</Text>}
+//         {loading && <Loader />}
+//         <ToastContainer />
+//       </>
+//     );
+//   }
+// }

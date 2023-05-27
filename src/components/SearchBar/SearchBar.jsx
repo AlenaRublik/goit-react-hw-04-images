@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import {
   Input,
   Button,
@@ -11,29 +11,27 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PropTypes from 'prop-types';
 
-class SearchBar extends Component {
-  state = { value: '' };
+export function SearchBar ({handleSearch}) {
+  const [value, setValue] = useState('');
 
-  static propTypes = {
-    handleSearch: PropTypes.func.isRequired,
-  };
 
-  handleChange = ({ target: { value } }) => this.setState({ value });
-
-  handleSubmit = e => {
+  const handleChange = (e) => {
+    setValue(e.target.value);
+  }
+    
+    
+  const handleSubmit = e => {
     e.preventDefault();
-    if (this.state.value.trim() === '') {
-      this.setState({ searchQuery: '' });
+    if (value.trim() === '') {
       toast.info('Enter yor search request.');
       return;
     }
-    this.props.handleSearch(this.state.value);
-    this.setState({ value: '' });
+    handleSearch(value);
   };
-  render() {
+ 
     return (
       <Header>
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={handleSubmit}>
           <Button type="submit" aria-label="search">
             <SearchFormLabel>Search</SearchFormLabel>
           </Button>
@@ -43,13 +41,58 @@ class SearchBar extends Component {
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
-            onChange={this.handleChange}
-            value={this.state.value}
+            onChange={handleChange}
+            value={value}
           />
         </Form>
       </Header>
     );
   }
-}
+
+
+ SearchBar.propTypes = {
+    handleSearch: PropTypes.func.isRequired,
+  };
+
+// class SearchBar extends Component {
+//   state = { value: '' };
+
+//   static propTypes = {
+//     handleSearch: PropTypes.func.isRequired,
+//   };
+
+//   handleChange = ({ target: { value } }) => this.setState({ value });
+
+//   handleSubmit = e => {
+//     e.preventDefault();
+//     if (this.state.value.trim() === '') {
+//       this.setState({ searchQuery: '' });
+//       toast.info('Enter yor search request.');
+//       return;
+//     }
+//     this.props.handleSearch(this.state.value);
+//     this.setState({ value: '' });
+//   };
+//   render() {
+//     return (
+//       <Header>
+//         <Form onSubmit={this.handleSubmit}>
+//           <Button type="submit" aria-label="search">
+//             <SearchFormLabel>Search</SearchFormLabel>
+//           </Button>
+
+//           <Input
+//             type="text"
+//             autoComplete="off"
+//             autoFocus
+//             placeholder="Search images and photos"
+//             onChange={this.handleChange}
+//             value={this.state.value}
+//           />
+//         </Form>
+//       </Header>
+//     );
+//   }
+// }
 
 export default SearchBar;

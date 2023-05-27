@@ -23,8 +23,6 @@ const Loader = props => {
       speed={speed}
       width={columns * coverWidthWithPadding}
       height={rows * coverHeightWithPadding}
-      primaryColor="#1063cf"
-          secondaryColor="#c1299d"
       backgroundColor="#8a9bff"
     foregroundColor="#ecebeb"
       {...props}
